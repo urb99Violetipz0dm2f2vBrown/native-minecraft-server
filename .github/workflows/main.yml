@@ -1,5 +1,10 @@
 name: Build Native Minecraft Server
-on: [ push, pull_request ]
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:  # 增加这一行即可手动触发
+
 jobs:
   build:
     name: Build on ${{ matrix.os }}
