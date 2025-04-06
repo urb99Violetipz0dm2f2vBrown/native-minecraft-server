@@ -3,15 +3,11 @@ name: Build Native Minecraft Server
 on:
   push:
   pull_request:
-  workflow_dispatch:  # 增加这一行即可手动触发
+  workflow_dispatch:
 
 jobs:
   build:
-    name: Build on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: graalvm/setup-graalvm@v1
@@ -22,9 +18,13 @@ jobs:
       - name: Check build.sh
         shell: bash
         run: shellcheck build.sh
-        if: ${{ matrix.os == 'ubuntu-latest' }}
       - name: Build and run native Minecraft server
         shell: bash
         run: |
           ./build.sh
           ./native-minecraft-server --help
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: native-minecraft-server
+          path: native-minecraft-server
