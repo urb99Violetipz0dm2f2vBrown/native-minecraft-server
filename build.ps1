@@ -84,8 +84,3 @@ Pop-Location  # 退出 BUILD_DIR
 
 Write-Host ""
 Write-Host "Done! The native Minecraft server has been built under the build directory."
-
-
-Write-Host ""
-Write-Host "Done! The native Minecraft server is located at:"
-Write-Host $destinationBinary
