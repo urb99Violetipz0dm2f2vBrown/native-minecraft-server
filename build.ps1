@@ -59,25 +59,27 @@ $MAIN_CLASS = (Get-Content $mainClassFile -Raw).Trim()
 
 Push-Location $META_INF_PATH
 
-# 构建 native-image 命令（注意Windows下使用分号作为classpath分隔符）
-$nativeImageCmd = "`"$NI_EXEC`" --no-fallback " +
-    "-H:ConfigurationFileDirectories=`"$SCRIPT_DIR\configuration\`" " +
-    "--enable-url-protocols=https " +
-    "--initialize-at-run-time=io.netty " +
-    "-H:+AllowVMInspection " +
-    "--initialize-at-build-time=net.minecraft.util.profiling.jfr.event " +
-    "-H:Name=`"$BINARY_NAME`" " +
-    "-cp `"$CLASSPATH_JOINED`" " +
-    "`"$MAIN_CLASS`""
+# 构建 native-image 参数数组（Windows下使用分号分隔classpath）
+$nativeImageArgs = @(
+    "--no-fallback",
+    "-H:ConfigurationFileDirectories=$SCRIPT_DIR\configuration\",
+    "--enable-url-protocols=https",
+    "--initialize-at-run-time=io.netty",
+    "-H:+AllowVMInspection",
+    "--initialize-at-build-time=net.minecraft.util.profiling.jfr.event",
+    "-H:Name=$BINARY_NAME",
+    "-cp", "$CLASSPATH_JOINED",
+    "$MAIN_CLASS"
+)
 
-# 先打印出命令
+# 打印完整命令用于调试
 Write-Host "Executing command:"
-Write-Host $nativeImageCmd
+Write-Host "$NI_EXEC $($nativeImageArgs -join ' ')"
 
-# 执行 native-image 命令
-Invoke-Expression $nativeImageCmd
+# 直接调用 native-image 命令
+& $NI_EXEC @nativeImageArgs
 
-# 移动生成的二进制文件到脚本目录
+# 将生成的二进制文件移动到脚本目录
 $sourceBinary = Join-Path $META_INF_PATH $BINARY_NAME
 $destinationBinary = Join-Path $SCRIPT_DIR $BINARY_NAME
 Move-Item -Path $sourceBinary -Destination $destinationBinary -Force
