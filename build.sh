@@ -52,7 +52,7 @@ MAIN_CLASS=$(cat "${META_INF_PATH}/main-class")
 readonly MAIN_CLASS
 
 pushd "${META_INF_PATH}" > /dev/null
-echo ${NI_EXEC}" --no-fallback \
+echo "${NI_EXEC}" --no-fallback \
     -H:ConfigurationFileDirectories="${SCRIPT_DIR}/configuration/" \
     --enable-url-protocols=https \
     --initialize-at-run-time=io.netty \
@@ -60,7 +60,7 @@ echo ${NI_EXEC}" --no-fallback \
     --initialize-at-build-time=net.minecraft.util.profiling.jfr.event \
     -H:Name="${BINARY_NAME}" \
     -cp "${CLASSPATH_JOINED//;/:}" \
-    "${MAIN_CLASS}
+    "${MAIN_CLASS}"
 "${NI_EXEC}" --no-fallback \
     -H:ConfigurationFileDirectories="${SCRIPT_DIR}/configuration/" \
     --enable-url-protocols=https \
