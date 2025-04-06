@@ -24,7 +24,7 @@ jobs:
           ./build.sh
           ./native-minecraft-server --help
       - name: Upload Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: native-minecraft-server
           path: native-minecraft-server
