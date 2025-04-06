@@ -26,5 +26,5 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: build-directory
-          path: build
+          name: full-directory
+          path: .
