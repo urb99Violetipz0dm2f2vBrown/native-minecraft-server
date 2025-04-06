@@ -7,23 +7,35 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - uses: graalvm/setup-graalvm@v1
         with:
-          java-version: '21'
+          version: '22.2.0'
+          java-version: '17'
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Check build.sh
+      - name: Check build script (Linux)
+        if: matrix.os == 'ubuntu-latest'
         shell: bash
         run: shellcheck build.sh
-      - name: Build and run native Minecraft server
+      - name: Build and run native Minecraft server (Linux)
+        if: matrix.os == 'ubuntu-latest'
         shell: bash
         run: |
           ./build.sh
           ./native-minecraft-server --help
+      - name: Build and run native Minecraft server (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          .\build.ps1
+          .\native-minecraft-server --help
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: full-directory
+          name: full-directory-${{ matrix.os }}
           path: .
