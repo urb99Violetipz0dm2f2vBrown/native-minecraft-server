@@ -79,19 +79,12 @@ Write-Host "$NI_EXEC $($nativeImageArgs -join ' ')"
 # 直接调用 native-image 命令
 & $NI_EXEC @nativeImageArgs
 
-# 将生成的二进制文件移动到脚本目录
-$sourceBinary = Join-Path $META_INF_PATH $BINARY_NAME
-$destinationBinary = Join-Path $SCRIPT_DIR $BINARY_NAME
-Move-Item -Path $sourceBinary -Destination $destinationBinary -Force
-
-Pop-Location  # 退出 META_INF_PATH
+Pop-Location  # 退出 META-INF
 Pop-Location  # 退出 BUILD_DIR
 
-# 如果存在 upx，则进行压缩
-if (Get-Command upx -ErrorAction SilentlyContinue) {
-    Write-Host "Compressing the native Minecraft server with upx..."
-    & upx $destinationBinary
-}
+Write-Host ""
+Write-Host "Done! The native Minecraft server has been built under the build directory."
+
 
 Write-Host ""
 Write-Host "Done! The native Minecraft server is located at:"
