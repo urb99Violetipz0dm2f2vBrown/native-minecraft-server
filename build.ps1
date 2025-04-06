@@ -59,7 +59,7 @@ $MAIN_CLASS = (Get-Content $mainClassFile -Raw).Trim()
 
 Push-Location $META_INF_PATH
 
-# 构建 native-image 参数数组（Windows下使用分号分隔classpath）
+# 构建 native-image 参数数组（Windows 下使用分号分隔 classpath）
 $nativeImageArgs = @(
     "--no-fallback",
     "-H:ConfigurationFileDirectories=$SCRIPT_DIR\configuration\",
@@ -69,7 +69,9 @@ $nativeImageArgs = @(
     "--initialize-at-build-time=net.minecraft.util.profiling.jfr.event",
     "-H:Name=$BINARY_NAME",
     "-cp", "$CLASSPATH_JOINED",
-    "$MAIN_CLASS"
+    "$MAIN_CLASS",
+    "-Dcom.oracle.svm.jfr.disable=true",
+    "-H:IncludeResources=.*jnidispatch.dll$"
 )
 
 # 打印完整命令用于调试
