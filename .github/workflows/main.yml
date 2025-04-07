@@ -14,7 +14,7 @@ jobs:
     # 构建矩阵，分别构建 Ubuntu 与 macOS 平台下的 x64 与 arm64 版本
     strategy:
       matrix:
-        os: [ubuntu-20.04, macos-latest]
+        os: [ubuntu-22.04, macos-latest]
         arch: [x64, arm64]
     runs-on: ${{ matrix.os }}
     env:
@@ -40,7 +40,7 @@ jobs:
       - name: Check build.sh
         shell: bash
         run: shellcheck build.sh
-        if: ${{ matrix.os == 'ubuntu-20.04' }}
+        if: ${{ matrix.os == 'ubuntu-22.04' }}
 
       # 根据不同平台构建原生 Minecraft 服务器
       - name: Build and run native Minecraft server
@@ -59,28 +59,33 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: minecraft-server-${{ matrix.os }}-${{ matrix.arch }}
-          path: ./native-minecraft-server
+          path: .
 
   release:
     needs: build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      # 下载所有构建产物
+      # 下载所有构建产物到 artifacts 目录
       - name: Download Build Artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
 
-      # 将所有产物打包到一个 zip 文件中
-      - name: Zip artifact for release
-        run: zip -r minecraft-server.zip artifacts
+      # 对每个构建产物单独打包成 zip 文件
+      - name: Zip individual build artifacts for release
+        run: |
+          for dir in artifacts/*; do
+            if [ -d "$dir" ]; then
+              zip -r "${dir}.zip" "$dir"
+            fi
+          done
 
       # 设置日期用于 release tag（格式为 YYYY.MM.DD）
       - name: Set up date
         id: date
         run: echo "DATE=$(date +'%Y.%m.%d')" >> $GITHUB_ENV
 
-      # 创建 release，并上传打包好的 zip 文件
+      # 创建 release，并上传所有单独打包好的 zip 文件
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
@@ -89,5 +94,5 @@ jobs:
           name: Release v${{ env.DATE }}
           draft: false
           prerelease: false
-          files: minecraft-server.zip
+          files: artifacts/*.zip
           token: ${{ secrets.GITHUB_TOKEN }}
