@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    # 构建矩阵，分别构建 ubuntu 与 macos 平台下的 x64 与 arm64 版本
+    # 构建矩阵，分别构建 Ubuntu 与 macOS 平台下的 x64 与 arm64 版本
     strategy:
       matrix:
         os: [ubuntu-20.04, macos-latest]
@@ -36,7 +36,7 @@ jobs:
 
       # 可选：如果需要额外配置环境变量或工具，可在这里添加步骤
 
-      # 检查 build.sh 脚本（确保脚本符合规范）
+      # 仅在 Ubuntu 上检查 build.sh 脚本（确保脚本符合规范）
       - name: Check build.sh
         shell: bash
         run: shellcheck build.sh
@@ -47,8 +47,11 @@ jobs:
         shell: bash
         run: |
           echo "Building for OS=${TARGET_OS} and ARCH=${TARGET_ARCH}"
-          # 请确保 build.sh 支持传入平台参数或已读取环境变量 TARGET_OS 和 TARGET_ARCH
-          ./build.sh
+          if [[ "${TARGET_OS}" == "macos-latest" ]]; then
+            ./build-macos.sh
+          else
+            ./build.sh
+          fi
 
       # 上传各平台构建产物（假设构建产物位于 ./native-minecraft-server 目录下）
       - name: Upload Build Artifact
