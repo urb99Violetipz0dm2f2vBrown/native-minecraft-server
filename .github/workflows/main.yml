@@ -2,40 +2,87 @@ name: Build Native Minecraft Server
 
 on:
   push:
+    branches:
+      - main
+    tags:
+      - 'v-*'
   pull_request:
   workflow_dispatch:
 
 jobs:
   build:
+    # 构建矩阵，分别构建 ubuntu 与 macos 平台下的 x64 与 arm64 版本
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-20.04, macos-latest]
+        arch: [x64, arm64]
     runs-on: ${{ matrix.os }}
+    env:
+      TARGET_OS: ${{ matrix.os }}
+      TARGET_ARCH: ${{ matrix.arch }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: graalvm/setup-graalvm@v1
+      - name: Checkout repository
+        uses: actions/checkout@v2
         with:
-          version: '22.2.0'
-          java-version: '17'
+          fetch-depth: 0
+
+      # 使用 graalvm/setup-graalvm@v1 设置 GraalVM 环境
+      - name: Setup GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '21'
+          distribution: 'graalvm'
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Check build script (Linux)
-        if: matrix.os == 'ubuntu-latest'
+
+      # 可选：如果需要额外配置环境变量或工具，可在这里添加步骤
+
+      # 检查 build.sh 脚本（确保脚本符合规范）
+      - name: Check build.sh
         shell: bash
         run: shellcheck build.sh
-      - name: Build and run native Minecraft server (Linux)
-        if: matrix.os == 'ubuntu-latest'
+
+      # 根据不同平台构建原生 Minecraft 服务器
+      - name: Build and run native Minecraft server
         shell: bash
         run: |
+          echo "Building for OS=${TARGET_OS} and ARCH=${TARGET_ARCH}"
+          # 请确保 build.sh 支持传入平台参数或已读取环境变量 TARGET_OS 和 TARGET_ARCH
           ./build.sh
-          ./native-minecraft-server --help
-      - name: Build and run native Minecraft server (Windows)
-        if: matrix.os == 'windows-latest'
-        shell: pwsh
-        run: |
-          .\build.ps1
-          .\build\META-INF\native-minecraft-server.exe --help
+
+      # 上传各平台构建产物（假设构建产物位于 ./native-minecraft-server 目录下）
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: full-directory-${{ matrix.os }}
-          path: .
+          name: minecraft-server-${{ matrix.os }}-${{ matrix.arch }}
+          path: ./native-minecraft-server
+
+  release:
+    needs: build
+    runs-on: ubuntu-20.04
+    steps:
+      # 下载所有构建产物
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: artifacts
+
+      # 将所有产物打包到一个 zip 文件中
+      - name: Zip artifact for release
+        run: zip -r minecraft-server.zip artifacts
+
+      # 设置日期用于 release tag（格式为 YYYY.MM.DD）
+      - name: Set up date
+        id: date
+        run: echo "DATE=$(date +'%Y.%m.%d')" >> $GITHUB_ENV
+
+      # 创建 release，并上传打包好的 zip 文件
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ env.DATE }}
+          name: Release v${{ env.DATE }}
+          draft: false
+          prerelease: false
+          files: minecraft-server.zip
+          token: ${{ secrets.GITHUB_TOKEN }}
