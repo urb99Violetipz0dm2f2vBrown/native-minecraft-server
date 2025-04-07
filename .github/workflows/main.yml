@@ -40,6 +40,7 @@ jobs:
       - name: Check build.sh
         shell: bash
         run: shellcheck build.sh
+        if: ${{ matrix.os == 'ubuntu-20.04' }}
 
       # 根据不同平台构建原生 Minecraft 服务器
       - name: Build and run native Minecraft server
