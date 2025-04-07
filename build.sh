@@ -54,6 +54,7 @@ readonly MAIN_CLASS
 pushd "${META_INF_PATH}" > /dev/null
 echo "${NI_EXEC}" --no-fallback \
     -H:ConfigurationFileDirectories="${SCRIPT_DIR}/configuration/" \
+    --gc=G1 \
     --enable-url-protocols=https \
     --initialize-at-run-time=io.netty \
     -H:+AllowVMInspection \
@@ -63,6 +64,7 @@ echo "${NI_EXEC}" --no-fallback \
     "${MAIN_CLASS}"
 "${NI_EXEC}" --no-fallback \
     -H:ConfigurationFileDirectories="${SCRIPT_DIR}/configuration/" \
+    --gc=G1 \
     --enable-url-protocols=https \
     --initialize-at-run-time=io.netty \
     -H:+AllowVMInspection \
