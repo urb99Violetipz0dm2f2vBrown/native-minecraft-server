@@ -48,6 +48,7 @@ jobs:
         run: |
           echo "Building for OS=${TARGET_OS} and ARCH=${TARGET_ARCH}"
           if [[ "${TARGET_OS}" == "macos-latest" ]]; then
+            chmod 775 ./build-macos.sh
             ./build-macos.sh
           else
             ./build.sh
