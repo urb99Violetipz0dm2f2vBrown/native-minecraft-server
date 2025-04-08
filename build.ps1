@@ -65,6 +65,7 @@ $nativeImageArgs = @(
     "-H:ConfigurationFileDirectories=$SCRIPT_DIR\configuration\",
     "--enable-url-protocols=https",
     "-H:+AllowVMInspection",
+    "--initialize-at-build-time=net.minecraft.util.profiling.jfr.event",
     "--initialize-at-run-time=io.netty,jdk.jfr,jdk.jfr.internal.JVM,java.awt,net.minecraft.util.profiling.jfr.event.WorldLoadFinishedEvent",
     "--initialize-at-run-time=jdk.jfr.internal.TypeLibrary,jdk.jfr.internal.PlatformEventType,jdk.jfr.internal.Options,jdk.jfr.internal.FlightRecorderPermission,jdk.jfr.internal.JVM,jdk.jfr.internal.Type,jdk.jfr.internal.JVMSupport,jdk.jfr.internal.SecuritySupport",
     "-Djdk.jfr.disableInstrumentation=true",
