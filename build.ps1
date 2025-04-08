@@ -61,13 +61,14 @@ Push-Location $META_INF_PATH
 
 # 构建 native-image 参数数组（Windows 下使用分号分隔 classpath）
 $nativeImageArgs = @(
-    "--initialize-at-run",
     "--no-fallback",
     "-H:ConfigurationFileDirectories=$SCRIPT_DIR\configuration\",
     "--enable-url-protocols=https",
     "-H:+AllowVMInspection",
     "--initialize-at-run-time=io.netty,jdk.jfr,jdk.jfr.internal.JVM,java.awt,net.minecraft.util.profiling.jfr.event.WorldLoadFinishedEvent",
-    "-Djdk.jfr.disableInstrumentation=true -Djdk.jfr.unsupported.vm=true",
+    "--initialize-at-run-time=jdk.jfr.internal.TypeLibrary,jdk.jfr.internal.PlatformEventType,jdk.jfr.internal.Options,jdk.jfr.internal.FlightRecorderPermission,jdk.jfr.internal.JVM,jdk.jfr.internal.Type,jdk.jfr.internal.JVMSupport,jdk.jfr.internal.SecuritySupport",
+    "-Djdk.jfr.disableInstrumentation=true",
+    "-Djdk.jfr.unsupported.vm=true",
     "-H:Name=$BINARY_NAME",
     "-cp", "$CLASSPATH_JOINED",
     "$MAIN_CLASS",
