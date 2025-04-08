@@ -59,7 +59,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: minecraft-server-${{ matrix.os }}-${{ matrix.arch }}
-          path: .
+          path: ./native-minecraft-server
 
   release:
     needs: build
