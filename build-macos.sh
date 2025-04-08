@@ -74,10 +74,10 @@ mv "${BINARY_NAME}" "${SCRIPT_DIR}/${BINARY_NAME}"
 popd > /dev/null # Exit $META_INF_PATH
 popd > /dev/null # Exit $BUILD_DIR
 
-if command -v upx &> /dev/null; then
-    echo "Compressing the native Minecraft server with upx..."
-    upx "${SCRIPT_DIR}/${BINARY_NAME}"
-fi
+# if command -v upx &> /dev/null; then
+#     echo "Compressing the native Minecraft server with upx..."
+#     upx "${SCRIPT_DIR}/${BINARY_NAME}"
+# fi
 
 echo ""
 echo "Done! The native Minecraft server is located at:"
