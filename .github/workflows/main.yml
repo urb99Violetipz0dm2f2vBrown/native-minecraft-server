@@ -35,12 +35,11 @@ jobs:
         with:
           fetch-depth: 0
 
-
-      # 使用 graalvm/setup-graalvm@v1 设置 GraalVM 环境
       - name: Setup GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
-          java-version: '21'
+          version: '22.2.0'
+          java-version: '17'
           distribution: 'graalvm'
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
