@@ -66,9 +66,11 @@ $nativeImageArgs = @(
     "--enable-url-protocols=https",
     "--initialize-at-run-time=io.netty",
     "-H:+AllowVMInspection",
-    "--initialize-at-build-time=net.minecraft.util.profiling.jfr.event",
+    "--initialize-at-run-time=io.netty,jdk.jfr,jdk.jfr.internal.JVM,java.awt,net.minecraft.util.profiling.jfr.event.WorldLoadFinishedEvent",
+    "-Djdk.jfr.disableInstrumentation=true -Djdk.jfr.unsupported.vm=true",
     "-H:Name=$BINARY_NAME",
     "-cp", "$CLASSPATH_JOINED",
+    " -Djava.home=$GRAALVM_HOME",
     "$MAIN_CLASS",
     "-Dcom.oracle.svm.jfr.disable=true",
     "-H:IncludeResources=.*jnidispatch.dll$"
