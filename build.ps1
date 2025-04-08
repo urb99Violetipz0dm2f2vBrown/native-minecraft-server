@@ -7,6 +7,7 @@ $SERVER_JAR_DL = "https://launcher.mojang.com/v1/objects/c8f83c5655308435b3dcf03
 $SCRIPT_DIR = $PSScriptRoot
 $BUILD_DIR = Join-Path $SCRIPT_DIR "build"
 $JAR_PATH = Join-Path $BUILD_DIR "server.jar"
+$ZIP_PATH = Join-Path $BUILD_DIR "server.zip"
 $META_INF_PATH = Join-Path $BUILD_DIR "META-INF"
 $BINARY_NAME = "native-minecraft-server"
 
@@ -35,12 +36,16 @@ if (-not (Test-Path $JAR_PATH)) {
     Invoke-WebRequest -Uri $SERVER_JAR_DL -OutFile $JAR_PATH
 }
 
+
 # 解压 META-INF 目录（如果不存在）
 if (-not (Test-Path $META_INF_PATH)) {
-    Write-Host "Extracting resources from Minecraft's server.jar..."
-    Expand-Archive -Path $JAR_PATH -DestinationPath $BUILD_DIR -Force
-}
+    Rename-Item -Path $JAR_PATH -NewName "server.zip" -Force
+    Write-Host "Extracting resources from Minecraft's server.zip..."
+    Expand-Archive -Path $ZIP_PATH -DestinationPath $BUILD_DIR -Force
 
+    # 解压完成后，将压缩包改回 jar 格式（便于后续可能的使用）
+    Rename-Item -Path $ZIP_PATH -NewName "server.jar" -Force
+}
 # 检查并读取 classpath-joined 文件
 $classpathJoinedFile = Join-Path $META_INF_PATH "classpath-joined"
 if (-not (Test-Path $classpathJoinedFile)) {
