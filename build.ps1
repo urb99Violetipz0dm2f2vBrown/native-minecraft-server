@@ -65,12 +65,9 @@ $nativeImageArgs = @(
     "-H:ConfigurationFileDirectories=$SCRIPT_DIR\configuration\",
     "--enable-url-protocols=https",
     "-H:+AllowVMInspection",
+    "-H:+ReportExceptionStackTraces",
     "--initialize-at-build-time=net.minecraft.util.profiling.jfr.event",
-    "--initialize-at-run-time=io.netty,jdk.jfr,jdk.jfr.internal.JVM,java.awt,net.minecraft.util.profiling.jfr.event.WorldLoadFinishedEvent," +
-      "jdk.jfr.internal.TypeLibrary,jdk.jfr.internal.PlatformEventType,jdk.jfr.internal.Options,jdk.jfr.internal.FlightRecorderPermission," +
-      "jdk.jfr.internal.Type,jdk.jfr.internal.JVMSupport,jdk.jfr.internal.SecuritySupport," +
-      "jdk.jfr.internal.EventInstrumentation`$FieldInfo,jdk.jfr.internal.settings.StackTraceSetting,jdk.jfr.EventType,jdk.jfr.internal.EventWriterMethod," +
-      "jdk.jfr.internal.ASMToolkit,jdk.jfr.internal.EventControl",
+    "--initialize-at-run-time=io.netty,jdk.jfr,jdk.jfr.internal.JVM,java.awt,net.minecraft.util.profiling.jfr.event.WorldLoadFinishedEvent,jdk.jfr.internal.TypeLibrary,jdk.jfr.internal.PlatformEventType,jdk.jfr.internal.Options,jdk.jfr.internal.FlightRecorderPermission,jdk.jfr.internal.Type,jdk.jfr.internal.JVMSupport,jdk.jfr.internal.SecuritySupport,jdk.jfr.internal.EventInstrumentation`$FieldInfo,jdk.jfr.internal.settings.StackTraceSetting,jdk.jfr.EventType,jdk.jfr.internal.EventWriterMethod,jdk.jfr.internal.ASMToolkit,jdk.jfr.internal.EventControl",
     "-Djdk.jfr.disableInstrumentation=true",
     "-Djdk.jfr.unsupported.vm=true",
     "-H:Name=$BINARY_NAME",
@@ -79,6 +76,7 @@ $nativeImageArgs = @(
     "-Dcom.oracle.svm.jfr.disable=true",
     "-H:IncludeResources=.*jnidispatch.dll$"
 )
+
 
 
 
