@@ -53,7 +53,6 @@ readonly MAIN_CLASS
 
 pushd "${META_INF_PATH}" > /dev/null
 echo "${NI_EXEC}" --no-fallback \
-    --static \
     -H:ConfigurationFileDirectories="${SCRIPT_DIR}/configuration/" \
     --enable-url-protocols=https \
     --initialize-at-run-time=io.netty \
@@ -63,7 +62,6 @@ echo "${NI_EXEC}" --no-fallback \
     -cp "${CLASSPATH_JOINED//;/:}" \
     "${MAIN_CLASS}"
 "${NI_EXEC}" --no-fallback \
-    --static \
     -H:ConfigurationFileDirectories="${SCRIPT_DIR}/configuration/" \
     --enable-url-protocols=https \
     --initialize-at-run-time=io.netty \
