@@ -67,8 +67,6 @@ $nativeImageArgs = @(
     "-H:+AllowVMInspection",
     "--initialize-at-run-time=io.netty,jdk.jfr,jdk.jfr.internal.JVM,java.awt,net.minecraft.util.profiling.jfr.event.WorldLoadFinishedEvent",
     "--initialize-at-run-time=jdk.jfr.internal.TypeLibrary,jdk.jfr.internal.PlatformEventType,jdk.jfr.internal.Options,jdk.jfr.internal.FlightRecorderPermission,jdk.jfr.internal.JVM,jdk.jfr.internal.Type,jdk.jfr.internal.JVMSupport,jdk.jfr.internal.SecuritySupport",
-    "--initialize-at-run-time=io.netty,jdk.jfr,jdk.jfr.internal.JVM,java.awt,net.minecraft.util.profiling.jfr.event.WorldLoadFinishedEvent"
-    "--report-unsupported-elements-at-runtime",
     "-Djdk.jfr.disableInstrumentation=true",
     "-Djdk.jfr.unsupported.vm=true",
     "-H:Name=$BINARY_NAME",
