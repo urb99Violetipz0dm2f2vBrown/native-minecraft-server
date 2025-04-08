@@ -18,12 +18,6 @@ if (-not $env:GRAALVM_HOME) {
 
 $NI_EXEC = Join-Path $env:GRAALVM_HOME "bin\native-image"
 
-# 检查 native-image 是否存在，不存在则安装
-if (-not (Test-Path $NI_EXEC)) {
-    Write-Host "Installing GraalVM Native Image..."
-    & (Join-Path $env:GRAALVM_HOME "bin\gu") install --no-progress native-image
-}
-
 # 创建 build 目录
 if (-not (Test-Path $BUILD_DIR)) {
     New-Item -ItemType Directory -Path $BUILD_DIR | Out-Null
