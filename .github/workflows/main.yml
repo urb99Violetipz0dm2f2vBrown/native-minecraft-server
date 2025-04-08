@@ -11,14 +11,19 @@ on:
 
 jobs:
   build:
-    # 使用 include 显式配置各平台组合
     strategy:
       matrix:
         include:
-
+          - os: ubuntu-22.04
+            arch: x64
+          - os: ubuntu-22.04
+            arch: arm64
           - os: windows-latest
             arch: x64
-
+          - os: macos-latest
+            arch: amd64
+          - os: macos-latest
+            arch: arm64
     runs-on: ${{ matrix.os }}
     env:
       TARGET_OS: ${{ matrix.os }}
@@ -32,8 +37,7 @@ jobs:
       - name: Setup GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
-          version: '22.2.0'
-          java-version: '17'
+          java-version: '21'
           distribution: 'graalvm'
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -44,6 +48,7 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-22.04' }}
         shell: bash
         run: shellcheck build.sh
+
       # 针对 Windows 平台，设置 GRAALVM_HOME（优先使用 setup-graalvm 的输出，如果有）
       - name: Configure GraalVM environment on Windows
         if: ${{ matrix.os == 'windows-latest' }}
@@ -78,12 +83,22 @@ jobs:
             ./build.sh
           fi
 
-      # 上传各平台构建产物（假设构建产物位于 ./native-minecraft-server 目录下）
-      - name: Upload Build Artifact
+      # 上传各平台构建产物
+      # Windows 下上传指定路径的构建产物
+      - name: Upload Build Artifact (Windows)
+        if: ${{ matrix.os == 'windows-latest' }}
         uses: actions/upload-artifact@v4
         with:
           name: minecraft-server-${{ matrix.os }}-${{ matrix.arch }}
-          path: .
+          path: build/META-INF/native-minecraft-server.exe
+
+      # Linux 和 macOS 下保持原有上传目录（假设构建产物位于 ./native-minecraft-server 目录下）
+      - name: Upload Build Artifact (Non-Windows)
+        if: ${{ matrix.os != 'windows-latest' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: minecraft-server-${{ matrix.os }}-${{ matrix.arch }}
+          path: ./native-minecraft-server
 
   release:
     needs: build
