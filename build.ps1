@@ -10,6 +10,7 @@ $JAR_PATH = Join-Path $BUILD_DIR "server.jar"
 $ZIP_PATH = Join-Path $BUILD_DIR "server.zip"
 $META_INF_PATH = Join-Path $BUILD_DIR "META-INF"
 $BINARY_NAME = "native-minecraft-server"
+$GRAALVM_HOME = $JAVA_HOME
 
 if (-not $env:GRAALVM_HOME) {
     Write-Host '$GRAALVM_HOME is not set. Please provide a GraalVM installation. Exiting...'
