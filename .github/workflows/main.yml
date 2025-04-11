@@ -108,12 +108,12 @@ jobs:
       - name: Download Build Artifacts
         uses: actions/download-artifact@v4
         with:
-          path: artifacts
+          path: .
 
       # 对每个构建产物单独打包成 zip 文件
       - name: Zip individual build artifacts for release
         run: |
-          for dir in artifacts/*; do
+          for dir in ./*; do
             if [ -d "$dir" ]; then
               zip -r "${dir}.zip" "$dir"
             fi
@@ -133,5 +133,5 @@ jobs:
           name: Release v${{ env.DATE }}
           draft: false
           prerelease: false
-          files: artifacts/*.zip
+          files: ./*.zip
           token: ${{ secrets.GITHUB_TOKEN }}
