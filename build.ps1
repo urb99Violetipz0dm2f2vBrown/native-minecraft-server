@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
 # 配置变量
-$SERVER_JAR_DL = "https://piston-data.mojang.com/v1/objects/f69c284232d7c7580bd89a5a4931c3581eae1378/server.jar"
+$SERVER_JAR_DL = "https://piston-data.mojang.com/v1/objects/64bb6d763bed0a9f1d632ec347938594144943ed/server.jar"
 $SCRIPT_DIR = $PSScriptRoot
 $BUILD_DIR = Join-Path $SCRIPT_DIR "build"
 $JAR_PATH = Join-Path $BUILD_DIR "server.jar"
