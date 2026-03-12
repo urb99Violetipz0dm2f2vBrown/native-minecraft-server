@@ -48,13 +48,11 @@ jobs:
         shell: bash
         run: sudo apt-get update && sudo apt-get install -y shellcheck
 
-      # 可选：如果需要额外配置环境变量或工具，可在这里添加步骤
-
       # 仅在 Ubuntu 上检查 build.sh 脚本（确保脚本符合规范）
       - name: Check build.sh
         if: ${{ matrix.os == 'ubuntu-22.04' }}
         shell: bash
-        run: shellcheck build.sh
+        run: shellcheck --shell=bash build.sh
 
       # 针对 Windows 平台，设置 GRAALVM_HOME（优先使用 setup-graalvm 的输出，如果有）
       - name: Configure GraalVM environment on Windows
