@@ -61,6 +61,7 @@ echo "${NI_EXEC}" --no-fallback \
     -H:+AddAllCharsets \
     -H:+ReportExceptionStackTraces \
     --enable-url-protocols=https \
+    --gc=G1 \
     --initialize-at-run-time=io.netty \
     --enable-monitoring=heapdump,jfr \
     --enable-native-access=ALL-UNNAMED \
@@ -77,6 +78,7 @@ echo "${NI_EXEC}" --no-fallback \
     -H:+AddAllCharsets \
     -H:+ReportExceptionStackTraces \
     --enable-url-protocols=https \
+    --gc=G1 \
     --initialize-at-run-time=io.netty \
     --enable-monitoring=heapdump,jfr \
     --enable-native-access=ALL-UNNAMED \
