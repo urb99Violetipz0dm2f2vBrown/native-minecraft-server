@@ -1,63 +1,123 @@
 {
   "resources":{
-  "includes":[
-    {
-      "pattern":"assets/.*"
-    },
-    {
-      "pattern":"data/.*"
-    },
-    {
-      "pattern":"\\QMETA-INF/MOJANGCS.SF\\E"
-    },
-    {
-      "pattern":"\\QMETA-INF/MOJANGCS.RSA\\E"
-    },
-    {
-      "pattern":"\\Qflightrecorder-config.jfc\\E"
-    },
-    {
-      "pattern":"\\QMETA-INF/libraries.list\\E"
-    },
-    {
-      "pattern":"\\QMETA-INF/native/libnetty_transport_native_epoll_x86_64.so\\E"
-    },
-    {
-      "pattern":"\\QMETA-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat\\E"
-    },
-    {
-      "pattern":"\\QMETA-INF/services/java.nio.file.spi.FileSystemProvider\\E"
-    },
-    {
-      "pattern":"\\QMETA-INF/services/org.apache.logging.log4j.core.util.ContextDataProvider\\E"
-    },
-    {
-      "pattern":"\\QMETA-INF/services/org.apache.logging.log4j.spi.Provider\\E"
-    },
-    {
-      "pattern":"\\QMETA-INF/services/org.apache.logging.log4j.util.PropertySource\\E"
-    },
-    {
-      "pattern":"\\QMETA-INF/services/org.slf4j.spi.SLF4JServiceProvider\\E"
-    },
-    {
-      "pattern":"\\Qlog4j2.xml\\E"
-    },
-    {
-      "pattern":"\\Qoshi.architecture.properties\\E"
-    },
-    {
-      "pattern":"\\Qoshi.properties\\E"
-    },
-    {
-      "pattern":"\\Qversion.json\\E"
-    },
-    {
-      "pattern":"\\Qyggdrasil_session_pubkey.der\\E"
-    }
-  ]},
-  "bundles":[
-    { "name":"joptsimple.ExceptionMessages" },
-    { "name":"joptsimple.HelpFormatterMessages" }
-  ]
+  "includes":[{
+    "pattern":"assets/.*"
+  }, {
+    "pattern":"data/.*"
+  }, {
+    "pattern":"\\QMETA-INF/libraries.list\\E"
+  }, {
+    "pattern":"\\QMETA-INF/log4j-provider.properties\\E"
+  }, {
+    "pattern":"\\QMETA-INF/main-class\\E"
+  }, {
+    "pattern":"\\QMETA-INF/native/libnetty_transport_native_epoll_x86_64.so\\E"
+  }, {
+    "pattern":"\\QMETA-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.lang.System$LoggerFinder\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.net.spi.InetAddressResolverProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.net.spi.URLStreamHandlerProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.nio.channels.spi.SelectorProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.nio.file.spi.FileSystemProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.time.zone.ZoneRulesProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/javax.xml.parsers.DocumentBuilderFactory\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.logging.log4j.core.util.ContextDataProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.logging.log4j.core.util.WatchEventService\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.logging.log4j.spi.Provider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.logging.log4j.util.PropertySource\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.slf4j.spi.SLF4JServiceProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/versions.list\\E"
+  }, {
+    "pattern":"\\Qassets/.mcassetsroot\\E"
+  }, {
+    "pattern":"\\Qassets/minecraft/lang/deprecated.json\\E"
+  }, {
+    "pattern":"\\Qassets/minecraft/lang/en_us.json\\E"
+  }, {
+    "pattern":"\\Qcom/sun/jna/linux-x86-64/libjnidispatch.so\\E"
+  }, {
+    "pattern":"\\Qdata/.mcassetsroot\\E"
+  }, {
+    "pattern":"\\Qlog4j2-test.jsn\\E"
+  }, {
+    "pattern":"\\Qlog4j2-test.json\\E"
+  }, {
+    "pattern":"\\Qlog4j2-test.properties\\E"
+  }, {
+    "pattern":"\\Qlog4j2-test.xml\\E"
+  }, {
+    "pattern":"\\Qlog4j2-test.yaml\\E"
+  }, {
+    "pattern":"\\Qlog4j2-test.yml\\E"
+  }, {
+    "pattern":"\\Qlog4j2-test69663380.jsn\\E"
+  }, {
+    "pattern":"\\Qlog4j2-test69663380.json\\E"
+  }, {
+    "pattern":"\\Qlog4j2-test69663380.properties\\E"
+  }, {
+    "pattern":"\\Qlog4j2-test69663380.xml\\E"
+  }, {
+    "pattern":"\\Qlog4j2-test69663380.yaml\\E"
+  }, {
+    "pattern":"\\Qlog4j2-test69663380.yml\\E"
+  }, {
+    "pattern":"\\Qlog4j2.StatusLogger.properties\\E"
+  }, {
+    "pattern":"\\Qlog4j2.component.properties\\E"
+  }, {
+    "pattern":"\\Qlog4j2.jsn\\E"
+  }, {
+    "pattern":"\\Qlog4j2.json\\E"
+  }, {
+    "pattern":"\\Qlog4j2.properties\\E"
+  }, {
+    "pattern":"\\Qlog4j2.system.properties\\E"
+  }, {
+    "pattern":"\\Qlog4j2.xml\\E"
+  }, {
+    "pattern":"\\Qlog4j2.yaml\\E"
+  }, {
+    "pattern":"\\Qlog4j2.yml\\E"
+  }, {
+    "pattern":"\\Qlog4j269663380.jsn\\E"
+  }, {
+    "pattern":"\\Qlog4j269663380.json\\E"
+  }, {
+    "pattern":"\\Qlog4j269663380.properties\\E"
+  }, {
+    "pattern":"\\Qlog4j269663380.xml\\E"
+  }, {
+    "pattern":"\\Qlog4j269663380.yaml\\E"
+  }, {
+    "pattern":"\\Qlog4j269663380.yml\\E"
+  }, {
+    "pattern":"\\Qoshi.architecture.properties\\E"
+  }, {
+    "pattern":"\\Qoshi.properties\\E"
+  }, {
+    "pattern":"\\Qversion.json\\E"
+  }, {
+    "pattern":"java.base:\\Qjdk/internal/icu/impl/data/icudt72b/nfkc.nrm\\E"
+  }, {
+    "pattern":"java.base:\\Qjdk/internal/icu/impl/data/icudt72b/uprops.icu\\E"
+  }, {
+    "pattern":"java.base:\\Qsun/net/idn/uidna.spp\\E"
+  }, {
+    "pattern":"jdk.jfr:\\Qjdk/jfr/internal/types/metadata.bin\\E"
+  }]},
+  "bundles":[]
 }
