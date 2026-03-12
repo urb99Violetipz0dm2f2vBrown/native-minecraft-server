@@ -83,7 +83,12 @@ jobs:
         run: |
           echo "Building for OS=${TARGET_OS} and ARCH=${TARGET_ARCH}"
           chmod 775 ./build-macos.sh
-          bash ./build-macos.sh
+          if [[ "${TARGET_ARCH}" == "arm64" ]]; then
+            echo "Using reduced parallelism and explicit heap settings for macOS arm64"
+            bash ./build-macos.sh --parallelism=2 -J-Xms1g -J-Xmx5g
+          else
+            bash ./build-macos.sh
+          fi
 
       # 上传各平台构建产物
       # Windows 下上传指定路径的构建产物
