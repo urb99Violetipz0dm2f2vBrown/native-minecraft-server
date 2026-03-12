@@ -78,7 +78,7 @@ jobs:
 
       # macOS 平台使用 Bash 显式执行 build-macos.sh
       - name: Build and run native Minecraft server (macOS)
-        if: ${{ matrix.os == 'macos-latest' }}
+        if: ${{ startsWith(matrix.os, 'macos-') }}
         shell: bash
         run: |
           echo "Building for OS=${TARGET_OS} and ARCH=${TARGET_ARCH}"
