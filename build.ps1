@@ -108,8 +108,11 @@ Write-Host "$NI_EXEC $($nativeImageArgs -join ' ')"
 # 直接调用 native-image 命令
 & $NI_EXEC @nativeImageArgs
 
+Move-Item -Path (Join-Path $META_INF_PATH "$BINARY_NAME.exe") -Destination (Join-Path $SCRIPT_DIR "$BINARY_NAME.exe") -Force
+
 Pop-Location  # 退出 META-INF
 Pop-Location  # 退出 BUILD_DIR
 
 Write-Host ""
-Write-Host "Done! The native Minecraft server has been built under the build directory."
+Write-Host "Done! The native Minecraft server is located at:"
+Write-Host (Join-Path $SCRIPT_DIR "$BINARY_NAME.exe")
