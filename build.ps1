@@ -27,6 +27,7 @@ if ([string]::IsNullOrWhiteSpace($SCRIPT_DIR)) {
         $SCRIPT_DIR = (Get-Location).Path
     }
 }
+$AGENT_CONFIG_DIR = Join-Path $SCRIPT_DIR "configuration"
 $BUILD_DIR = Join-Path $SCRIPT_DIR "build"
 $JAR_PATH = Join-Path $BUILD_DIR "server.jar"
 $ZIP_PATH = Join-Path $BUILD_DIR "server.zip"
@@ -84,18 +85,20 @@ Push-Location $META_INF_PATH
 # 构建 native-image 参数数组（Windows 下使用分号分隔 classpath）
 $nativeImageArgs = @(
     "--no-fallback",
-    "-H:ConfigurationFileDirectories=$SCRIPT_DIR\configuration\",
+    "-H:ConfigurationFileDirectories=$AGENT_CONFIG_DIR",
+    "-H:+AddAllCharsets",
+    "-H:+ReportExceptionStackTraces",
     "--enable-url-protocols=https",
-    "-H:+AllowVMInspection",
-    "--initialize-at-run-time=io.netty,jdk.jfr,jdk.jfr.internal.JVM,java.awt,net.minecraft.util.profiling.jfr.event.WorldLoadFinishedEvent",
-    "--initialize-at-run-time=jdk.jfr.internal.TypeLibrary,jdk.jfr.internal.PlatformEventType,jdk.jfr.internal.Options,jdk.jfr.internal.FlightRecorderPermission,jdk.jfr.internal.JVM,jdk.jfr.internal.Type,jdk.jfr.internal.JVMSupport,jdk.jfr.internal.SecuritySupport",
-    "-Djdk.jfr.disableInstrumentation=true",
-    "-Djdk.jfr.unsupported.vm=true",
+    "--initialize-at-run-time=io.netty",
+    "--enable-monitoring=heapdump,jfr",
+    "--enable-native-access=ALL-UNNAMED",
+    "--initialize-at-build-time=net.minecraft.util.profiling.jfr.event",
+    "--initialize-at-run-time=org.apache.logging.log4j",
+    "--initialize-at-run-time=joptsimple",
+    "--initialize-at-run-time=org.apache.logging.log4j.core.util.DefaultShutdownCallbackRegistry",
     "-H:Name=$BINARY_NAME",
     "-cp", "$CLASSPATH_JOINED",
-    "$MAIN_CLASS",
-    "-Dcom.oracle.svm.jfr.disable=true",
-    "-H:IncludeResources=.*jnidispatch.dll$"
+    "$MAIN_CLASS"
 )
 
 # 打印完整命令用于调试
