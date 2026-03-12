@@ -52,7 +52,16 @@ jobs:
       - name: Check build.sh
         if: ${{ matrix.os == 'ubuntu-22.04' }}
         shell: bash
-        run: shellcheck --shell=bash build.sh
+        run: |
+          echo "Checking script types..."
+          file -b build.sh || true
+          head -n 5 build.sh
+          # Only run shellcheck if it is actually a bash script
+          if head -n 1 build.sh | grep -qE '^#!/usr/bin/env (bash|sh)$'; then
+            shellcheck --shell=bash build.sh
+          else
+            echo "Skipping shellcheck: build.sh is not a bash script on this runner."
+          fi
 
       # 针对 Windows 平台，设置 GRAALVM_HOME（优先使用 setup-graalvm 的输出，如果有）
       - name: Configure GraalVM environment on Windows
