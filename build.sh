@@ -1,105 +1,89 @@
-#!/usr/bin/env pwsh
-$ErrorActionPreference = "Stop"
-Set-StrictMode -Version Latest
+#!/usr/bin/env bash
 
-# 配置变量
-$SERVER_VERSION = if ($env:SERVER_VERSION) { $env:SERVER_VERSION } else { "1.21.11" }
+set -o errexit
+set -o nounset
 
-$versionManifestJson = Invoke-RestMethod -Uri "https://piston-meta.mojang.com/mc/game/version_manifest.json"
-$serverManifestUrl = ($versionManifestJson.versions | Where-Object { $_.id -eq $SERVER_VERSION } | Select-Object -First 1).url
-if (-not $serverManifestUrl) {
-    Write-Host "Unable to find manifest url for SERVER_VERSION=$SERVER_VERSION. Exiting..."
+SERVER_VERSION="${SERVER_VERSION:-"1.21.11"}"
+SERVER_MANIFEST_URL="$(curl "https://piston-meta.mojang.com/mc/game/version_manifest.json" | jq -r ".versions[] | select(.id == \"${SERVER_VERSION}\") | .url")"
+
+SERVER_JAR_DL="$(curl "$SERVER_MANIFEST_URL" | jq -r ".downloads.server.url")"
+SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+BUILD_DIR="${SCRIPT_DIR}/build"
+JAR_PATH="${BUILD_DIR}/server.jar"
+META_INF_PATH="${BUILD_DIR}/META-INF"
+BINARY_NAME="native-minecraft-server"
+NI_EXEC="${GRAALVM_HOME:-}/bin/native-image"
+readonly SERVER_VERSION SERVER_MANIFEST_URL SERVER_JAR_DL SCRIPT_DIR BUILD_DIR JAR_PATH META_INF_PATH BINARY_NAME NI_EXEC
+
+if [[ -z "${GRAALVM_HOME:-}" ]]; then
+    echo "\$GRAALVM_HOME is not set. Please provide a GraalVM installation. Exiting..."
     exit 1
-}
+fi
 
-$serverManifestJson = Invoke-RestMethod -Uri $serverManifestUrl
-$SERVER_JAR_DL = $serverManifestJson.downloads.server.url
-if (-not $SERVER_JAR_DL) {
-    Write-Host "Unable to find server.jar download url for SERVER_VERSION=$SERVER_VERSION. Exiting..."
+if ! command -v "${NI_EXEC}" &> /dev/null; then
+    echo "Installing GraalVM Native Image..."
+    "${GRAALVM_HOME}/bin/gu" install --no-progress native-image
+fi
+
+if [[ ! -d "${BUILD_DIR}" ]]; then
+    mkdir "${BUILD_DIR}"
+fi
+pushd "${BUILD_DIR}" > /dev/null
+
+if [[ ! -f "${JAR_PATH}" ]]; then
+    echo "Downloading Minecraft's server.jar..."
+    curl --show-error --fail --location -o "${JAR_PATH}" "${SERVER_JAR_DL}"
+fi
+
+if [[ ! -d "${META_INF_PATH}" ]]; then
+    echo "Extracting resources from Minecraft's server.jar..."
+    unzip -qq "${JAR_PATH}" "META-INF/*" -d "."
+fi
+
+if [[ ! -f "${META_INF_PATH}/classpath-joined" ]]; then
+    echo "Unable to determine classpath. Exiting..."
     exit 1
-}
+fi
+CLASSPATH_JOINED=$(cat "${META_INF_PATH}/classpath-joined")
+readonly CLASSPATH_JOINED
 
-$SCRIPT_DIR = $PSScriptRoot
-$BUILD_DIR = Join-Path $SCRIPT_DIR "build"
-$JAR_PATH = Join-Path $BUILD_DIR "server.jar"
-$ZIP_PATH = Join-Path $BUILD_DIR "server.zip"
-$META_INF_PATH = Join-Path $BUILD_DIR "META-INF"
-$BINARY_NAME = "native-minecraft-server"
-
-
-if (-not $env:GRAALVM_HOME) {
-    Write-Host '$GRAALVM_HOME is not set. Please provide a GraalVM installation. Exiting...'
+if [[ ! -f "${META_INF_PATH}/main-class" ]]; then
+    echo "Unable to determine main class. Exiting..."
     exit 1
-}
+fi
+MAIN_CLASS=$(cat "${META_INF_PATH}/main-class")
+readonly MAIN_CLASS
 
-$NI_EXEC = Join-Path $env:GRAALVM_HOME "bin\native-image"
+pushd "${META_INF_PATH}" > /dev/null
+echo "${NI_EXEC}" --no-fallback \
+    -H:ConfigurationFileDirectories="${SCRIPT_DIR}/configuration/" \
+    --gc=G1 \
+    --enable-url-protocols=https \
+    --initialize-at-run-time=io.netty \
+    -H:+AllowVMInspection \
+    --initialize-at-build-time=net.minecraft.util.profiling.jfr.event \
+    -H:Name="${BINARY_NAME}" \
+    -cp "${CLASSPATH_JOINED//;/:}" \
+    "${MAIN_CLASS}"
+"${NI_EXEC}" --no-fallback \
+    -H:ConfigurationFileDirectories="${SCRIPT_DIR}/configuration/" \
+    --gc=G1 \
+    --enable-url-protocols=https \
+    --initialize-at-run-time=io.netty \
+    -H:+AllowVMInspection \
+    --initialize-at-build-time=net.minecraft.util.profiling.jfr.event \
+    -H:Name="${BINARY_NAME}" \
+    -cp "${CLASSPATH_JOINED//;/:}" \
+    "${MAIN_CLASS}"
+mv "${BINARY_NAME}" "${SCRIPT_DIR}/${BINARY_NAME}"
+popd > /dev/null # Exit $META_INF_PATH
+popd > /dev/null # Exit $BUILD_DIR
 
-# 创建 build 目录
-if (-not (Test-Path $BUILD_DIR)) {
-    New-Item -ItemType Directory -Path $BUILD_DIR | Out-Null
-}
-Push-Location $BUILD_DIR
+# if command -v upx &> /dev/null; then
+#     echo "Compressing the native Minecraft server with upx..."
+#     upx "${SCRIPT_DIR}/${BINARY_NAME}"
+# fi
 
-# 下载 server.jar（如果不存在）
-if (-not (Test-Path $JAR_PATH)) {
-    Write-Host "Downloading Minecraft's server.jar..."
-    Invoke-WebRequest -Uri $SERVER_JAR_DL -OutFile $JAR_PATH
-}
-
-
-# 解压 META-INF 目录（如果不存在）
-if (-not (Test-Path $META_INF_PATH)) {
-    Rename-Item -Path $JAR_PATH -NewName "server.zip" -Force
-    Write-Host "Extracting resources from Minecraft's server.zip..."
-    Expand-Archive -Path $ZIP_PATH -DestinationPath $BUILD_DIR -Force
-
-    # 解压完成后，将压缩包改回 jar 格式（便于后续可能的使用）
-    Rename-Item -Path $ZIP_PATH -NewName "server.jar" -Force
-}
-# 检查并读取 classpath-joined 文件
-$classpathJoinedFile = Join-Path $META_INF_PATH "classpath-joined"
-if (-not (Test-Path $classpathJoinedFile)) {
-    Write-Host "Unable to determine classpath. Exiting..."
-    exit 1
-}
-$CLASSPATH_JOINED = (Get-Content $classpathJoinedFile -Raw).Trim()
-
-# 检查并读取 main-class 文件
-$mainClassFile = Join-Path $META_INF_PATH "main-class"
-if (-not (Test-Path $mainClassFile)) {
-    Write-Host "Unable to determine main class. Exiting..."
-    exit 1
-}
-$MAIN_CLASS = (Get-Content $mainClassFile -Raw).Trim()
-
-Push-Location $META_INF_PATH
-
-# 构建 native-image 参数数组（Windows 下使用分号分隔 classpath）
-$nativeImageArgs = @(
-    "--no-fallback",
-    "-H:ConfigurationFileDirectories=$SCRIPT_DIR\configuration\",
-    "--enable-url-protocols=https",
-    "-H:+AllowVMInspection",
-    "--initialize-at-run-time=io.netty,jdk.jfr,jdk.jfr.internal.JVM,java.awt,net.minecraft.util.profiling.jfr.event.WorldLoadFinishedEvent",
-    "--initialize-at-run-time=jdk.jfr.internal.TypeLibrary,jdk.jfr.internal.PlatformEventType,jdk.jfr.internal.Options,jdk.jfr.internal.FlightRecorderPermission,jdk.jfr.internal.JVM,jdk.jfr.internal.Type,jdk.jfr.internal.JVMSupport,jdk.jfr.internal.SecuritySupport",
-    "-Djdk.jfr.disableInstrumentation=true",
-    "-Djdk.jfr.unsupported.vm=true",
-    "-H:Name=$BINARY_NAME",
-    "-cp", "$CLASSPATH_JOINED",
-    "$MAIN_CLASS",
-    "-Dcom.oracle.svm.jfr.disable=true",
-    "-H:IncludeResources=.*jnidispatch.dll$"
-)
-
-# 打印完整命令用于调试
-Write-Host "Executing command:"
-Write-Host "$NI_EXEC $($nativeImageArgs -join ' ')"
-
-# 直接调用 native-image 命令
-& $NI_EXEC @nativeImageArgs
-
-Pop-Location  # 退出 META-INF
-Pop-Location  # 退出 BUILD_DIR
-
-Write-Host ""
-Write-Host "Done! The native Minecraft server has been built under the build directory."
+echo ""
+echo "Done! The native Minecraft server is located at:"
+echo "${SCRIPT_DIR}/${BINARY_NAME}"
