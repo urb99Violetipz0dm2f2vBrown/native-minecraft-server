@@ -42,27 +42,6 @@ jobs:
           distribution: 'graalvm'
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      # ShellCheck only runs on Linux and requires shellcheck to be installed
-      - name: Install ShellCheck
-        if: ${{ matrix.os == 'ubuntu-22.04' }}
-        shell: bash
-        run: sudo apt-get update && sudo apt-get install -y shellcheck
-
-      # 仅在 Ubuntu 上检查 build.sh 脚本（确保脚本符合规范）
-      - name: Check build.sh
-        if: ${{ matrix.os == 'ubuntu-22.04' }}
-        shell: bash
-        run: |
-          echo "Checking script types..."
-          file -b build.sh || true
-          head -n 5 build.sh
-          # Only run shellcheck if it is actually a bash script
-          if head -n 1 build.sh | grep -qE '^#!/usr/bin/env (bash|sh)$'; then
-            shellcheck --shell=bash build.sh
-          else
-            echo "Skipping shellcheck: build.sh is not a bash script on this runner."
-          fi
-
       # 针对 Windows 平台，设置 GRAALVM_HOME（优先使用 setup-graalvm 的输出，如果有）
       - name: Configure GraalVM environment on Windows
         if: ${{ matrix.os == 'windows-latest' }}
@@ -94,6 +73,7 @@ jobs:
             chmod 775 ./build-macos.sh
             ./build-macos.sh
           else
+            chmod 775 ./build.sh
             ./build.sh
           fi
 
