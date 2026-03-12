@@ -84,8 +84,8 @@ jobs:
           echo "Building for OS=${TARGET_OS} and ARCH=${TARGET_ARCH}"
           chmod 775 ./build-macos.sh
           if [[ "${TARGET_ARCH}" == "arm64" ]]; then
-            echo "Using reduced parallelism and explicit heap settings for macOS arm64"
-            bash ./build-macos.sh --parallelism=2 -J-Xms1g -J-Xmx5g
+            echo "Using stricter memory limits for macOS arm64 native-image build"
+            bash ./build-macos.sh --parallelism=1 -J-Xms2g -J-Xmx6g -J-XX:+UseG1GC
           else
             bash ./build-macos.sh
           fi
@@ -97,20 +97,15 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: "minecraft-server-${{ matrix.os }}-${{ matrix.arch }}"
-          path: |
-            build/META-INF/native-minecraft-server.exe
-            build/**/*.dll
+          path: ./native-minecraft-server.exe
 
-      # Linux 和 macOS 下上传主程序以及本地动态库
+      # Linux 和 macOS 下上传主程序
       - name: Upload Build Artifact (Non-Windows)
         if: ${{ matrix.os != 'windows-latest' }}
         uses: actions/upload-artifact@v4
         with:
           name: "minecraft-server-${{ matrix.os }}-${{ matrix.arch }}"
-          path: |
-            ./native-minecraft-server
-            build/**/*.so
-            build/**/*.dylib
+          path: ./native-minecraft-server
 
   release:
     needs: build
