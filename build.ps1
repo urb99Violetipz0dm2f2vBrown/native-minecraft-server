@@ -3,8 +3,30 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
 # 配置变量
-$SERVER_JAR_DL = "https://piston-data.mojang.com/v1/objects/64bb6d763bed0a9f1d632ec347938594144943ed/server.jar"
+$SERVER_VERSION = if ($env:SERVER_VERSION) { $env:SERVER_VERSION } else { "1.21.11" }
+
+$versionManifestJson = Invoke-RestMethod -Uri "https://piston-meta.mojang.com/mc/game/version_manifest.json"
+$serverManifestUrl = ($versionManifestJson.versions | Where-Object { $_.id -eq $SERVER_VERSION } | Select-Object -First 1).url
+if (-not $serverManifestUrl) {
+    Write-Host "Unable to find manifest url for SERVER_VERSION=$SERVER_VERSION. Exiting..."
+    exit 1
+}
+
+$serverManifestJson = Invoke-RestMethod -Uri $serverManifestUrl
+$SERVER_JAR_DL = $serverManifestJson.downloads.server.url
+if (-not $SERVER_JAR_DL) {
+    Write-Host "Unable to find server.jar download url for SERVER_VERSION=$SERVER_VERSION. Exiting..."
+    exit 1
+}
+
 $SCRIPT_DIR = $PSScriptRoot
+if ([string]::IsNullOrWhiteSpace($SCRIPT_DIR)) {
+    if ($MyInvocation.MyCommand.Path) {
+        $SCRIPT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Path
+    } else {
+        $SCRIPT_DIR = (Get-Location).Path
+    }
+}
 $BUILD_DIR = Join-Path $SCRIPT_DIR "build"
 $JAR_PATH = Join-Path $BUILD_DIR "server.jar"
 $ZIP_PATH = Join-Path $BUILD_DIR "server.zip"
