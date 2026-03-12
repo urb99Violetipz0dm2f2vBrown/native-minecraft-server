@@ -8,12 +8,13 @@ SERVER_MANIFEST_URL="$(curl "https://piston-meta.mojang.com/mc/game/version_mani
 
 SERVER_JAR_DL="$(curl "$SERVER_MANIFEST_URL" | jq -r ".downloads.server.url")"
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+AGENT_CONFIG_DIR="${SCRIPT_DIR}/configuration/"
 BUILD_DIR="${SCRIPT_DIR}/build"
 JAR_PATH="${BUILD_DIR}/server.jar"
 META_INF_PATH="${BUILD_DIR}/META-INF"
 BINARY_NAME="native-minecraft-server"
 NI_EXEC="${GRAALVM_HOME:-}/bin/native-image"
-readonly SERVER_VERSION SERVER_MANIFEST_URL SERVER_JAR_DL SCRIPT_DIR BUILD_DIR JAR_PATH META_INF_PATH BINARY_NAME NI_EXEC
+readonly SERVER_VERSION SERVER_MANIFEST_URL SERVER_JAR_DL SCRIPT_DIR AGENT_CONFIG_DIR BUILD_DIR JAR_PATH META_INF_PATH BINARY_NAME NI_EXEC
 
 if [[ -z "${GRAALVM_HOME:-}" ]]; then
     echo "\$GRAALVM_HOME is not set. Please provide a GraalVM installation. Exiting..."
@@ -56,22 +57,36 @@ readonly MAIN_CLASS
 
 pushd "${META_INF_PATH}" > /dev/null
 echo "${NI_EXEC}" --no-fallback \
-    -H:ConfigurationFileDirectories="${SCRIPT_DIR}/configuration/" \
+    -H:ConfigurationFileDirectories="${AGENT_CONFIG_DIR}" \
+    -H:+AddAllCharsets \
+    -H:+ReportExceptionStackTraces \
     --enable-url-protocols=https \
     --initialize-at-run-time=io.netty \
-    -H:+AllowVMInspection \
+    --enable-monitoring=heapdump,jfr \
+    --enable-native-access=ALL-UNNAMED \
     --initialize-at-build-time=net.minecraft.util.profiling.jfr.event \
+    --initialize-at-run-time=org.apache.logging.log4j \
+    --initialize-at-run-time=joptsimple \
+    --initialize-at-run-time=org.apache.logging.log4j.core.util.DefaultShutdownCallbackRegistry \
     -H:Name="${BINARY_NAME}" \
     -cp "${CLASSPATH_JOINED//;/:}" \
+    "$@" \
     "${MAIN_CLASS}"
 "${NI_EXEC}" --no-fallback \
-    -H:ConfigurationFileDirectories="${SCRIPT_DIR}/configuration/" \
+    -H:ConfigurationFileDirectories="${AGENT_CONFIG_DIR}" \
+    -H:+AddAllCharsets \
+    -H:+ReportExceptionStackTraces \
     --enable-url-protocols=https \
     --initialize-at-run-time=io.netty \
-    -H:+AllowVMInspection \
+    --enable-monitoring=heapdump,jfr \
+    --enable-native-access=ALL-UNNAMED \
     --initialize-at-build-time=net.minecraft.util.profiling.jfr.event \
+    --initialize-at-run-time=org.apache.logging.log4j \
+    --initialize-at-run-time=joptsimple \
+    --initialize-at-run-time=org.apache.logging.log4j.core.util.DefaultShutdownCallbackRegistry \
     -H:Name="${BINARY_NAME}" \
     -cp "${CLASSPATH_JOINED//;/:}" \
+    "$@" \
     "${MAIN_CLASS}"
 mv "${BINARY_NAME}" "${SCRIPT_DIR}/${BINARY_NAME}"
 popd > /dev/null # Exit $META_INF_PATH
