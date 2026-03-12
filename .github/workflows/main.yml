@@ -21,9 +21,9 @@ jobs:
             arch: arm64
           - os: windows-latest
             arch: x64
-          - os: macos-latest
+          - os: macos-15-intel
             arch: amd64
-          - os: macos-latest
+          - os: macos-15
             arch: arm64
     runs-on: ${{ matrix.os }}
     env:
@@ -39,7 +39,7 @@ jobs:
         id: setup-graalvm
         uses: graalvm/setup-graalvm@v1
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: 'graalvm'
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -86,7 +86,7 @@ jobs:
           chmod 775 ./build-macos.sh
           if [[ "${TARGET_ARCH}" == "arm64" ]]; then
             echo "Using stricter memory limits for macOS arm64 native-image build"
-            bash ./build-macos.sh --parallelism=1 -J-Xms2g -J-Xmx6g -J-XX:+UseG1GC
+            bash ./build-macos.sh --parallelism=2 -J-Xms2g -J-Xmx6g -J-XX:+UseG1GC
           else
             bash ./build-macos.sh
           fi
