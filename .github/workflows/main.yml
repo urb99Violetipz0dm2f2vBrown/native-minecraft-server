@@ -63,19 +63,23 @@ jobs:
           Write-Output "Building for OS=${env:TARGET_OS} and ARCH=${env:TARGET_ARCH}"
           .\build.ps1
 
-      # 针对 Ubuntu 与 macOS 平台使用 Bash 执行对应的构建脚本
-      - name: Build and run native Minecraft server (Unix)
-        if: ${{ matrix.os != 'windows-latest' }}
+      # Linux 平台使用 Bash 显式执行 build.sh
+      - name: Build and run native Minecraft server (Linux)
+        if: ${{ startsWith(matrix.os, 'ubuntu-') }}
         shell: bash
         run: |
           echo "Building for OS=${TARGET_OS} and ARCH=${TARGET_ARCH}"
-          if [[ "${TARGET_OS}" == "macos-latest" ]]; then
-            chmod 775 ./build-macos.sh
-            ./build-macos.sh
-          else
-            chmod 775 ./build.sh
-            ./build.sh
-          fi
+          chmod 775 ./build.sh
+          bash ./build.sh
+
+      # macOS 平台使用 Bash 显式执行 build-macos.sh
+      - name: Build and run native Minecraft server (macOS)
+        if: ${{ matrix.os == 'macos-latest' }}
+        shell: bash
+        run: |
+          echo "Building for OS=${TARGET_OS} and ARCH=${TARGET_ARCH}"
+          chmod 775 ./build-macos.sh
+          bash ./build-macos.sh
 
       # 上传各平台构建产物
       # Windows 下上传指定路径的构建产物
