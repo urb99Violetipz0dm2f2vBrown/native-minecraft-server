@@ -21,9 +21,9 @@ jobs:
             arch: arm64
           - os: windows-latest
             arch: x64
-          - os: macos-15-intel
+          - os: macos-latest
             arch: amd64
-          - os: macos-15
+          - os: macos-latest
             arch: arm64
     runs-on: ${{ matrix.os }}
     env:
@@ -43,7 +43,6 @@ jobs:
           distribution: 'graalvm'
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      # 针对 Windows 平台，设置 GRAALVM_HOME（优先使用 setup-graalvm 的输出，如果有）
       - name: Configure GraalVM environment on Windows
         if: ${{ matrix.os == 'windows-latest' }}
         shell: pwsh
@@ -60,7 +59,6 @@ jobs:
           "JAVA_HOME=$javaHome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           "GRAALVM_HOME=$javaHome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-      # 针对 Windows 平台使用 PowerShell 执行 build.ps1
       - name: Build and run native Minecraft server (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
         shell: pwsh
@@ -68,7 +66,6 @@ jobs:
           Write-Output "Building for OS=${env:TARGET_OS} and ARCH=${env:TARGET_ARCH}"
           .\build.ps1
 
-      # Linux 平台使用 Bash 显式执行 build.sh
       - name: Build and run native Minecraft server (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu-') }}
         shell: bash
@@ -77,7 +74,7 @@ jobs:
           chmod 775 ./build.sh
           bash ./build.sh
 
-      # macOS 平台使用 Bash 显式执行 build-macos.sh
+
       - name: Build and run native Minecraft server (macOS)
         if: ${{ startsWith(matrix.os, 'macos-') }}
         shell: bash
@@ -91,8 +88,7 @@ jobs:
             bash ./build-macos.sh
           fi
 
-      # 上传各平台构建产物
-      # Windows 下上传指定路径的构建产物
+
       - name: Upload Build Artifact (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
         uses: actions/upload-artifact@v4
@@ -100,7 +96,6 @@ jobs:
           name: "minecraft-server-${{ matrix.os }}-${{ matrix.arch }}"
           path: ./native-minecraft-server.exe
 
-      # Linux 和 macOS 下上传主程序
       - name: Upload Build Artifact (Non-Windows)
         if: ${{ matrix.os != 'windows-latest' }}
         uses: actions/upload-artifact@v4
@@ -113,13 +108,11 @@ jobs:
     needs: build
     runs-on: ubuntu-22.04
     steps:
-      # 下载所有构建产物到 artifacts 目录
       - name: Download Build Artifacts
         uses: actions/download-artifact@v4
         with:
           path: .
 
-      # 对每个构建产物单独打包成 zip 文件
       - name: Zip individual build artifacts for release
         run: |
           for dir in ./*; do
@@ -128,12 +121,10 @@ jobs:
             fi
           done
 
-      # 设置日期用于 release tag（格式为 YYYY.MM.DD）
       - name: Set up date
         id: date
         run: echo "DATE=$(date +'%Y.%m.%d')" >> $GITHUB_ENV
 
-      # 创建 release，并上传所有单独打包好的 zip 文件
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
