@@ -15,9 +15,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04
+          - os: ubuntu-latest
             arch: x64
-          - os: ubuntu-22.04
+          - os: ubuntu-latest
             arch: arm64
           - os: windows-latest
             arch: x64
