@@ -62,7 +62,6 @@ echo "${NI_EXEC}" --no-fallback \
     -H:+ReportExceptionStackTraces \
     --enable-url-protocols=https \
     --initialize-at-run-time=io.netty \
-    # --enable-monitoring=heapdump,jfr \
     --enable-native-access=ALL-UNNAMED \
     --initialize-at-build-time=net.minecraft.util.profiling.jfr.event \
     --initialize-at-run-time=org.apache.logging.log4j \
@@ -78,7 +77,6 @@ echo "${NI_EXEC}" --no-fallback \
     -H:+ReportExceptionStackTraces \
     --enable-url-protocols=https \
     --initialize-at-run-time=io.netty \
-    # --enable-monitoring=heapdump,jfr \
     --enable-native-access=ALL-UNNAMED \
     --initialize-at-build-time=net.minecraft.util.profiling.jfr.event \
     --initialize-at-run-time=org.apache.logging.log4j \
