@@ -81,13 +81,7 @@ jobs:
         run: |
           echo "Building for OS=${TARGET_OS} and ARCH=${TARGET_ARCH}"
           chmod 775 ./build-macos.sh
-          if [[ "${TARGET_ARCH}" == "arm64" ]]; then
-            echo "Using stricter memory limits for macOS arm64 native-image build"
-            bash ./build-macos.sh --parallelism=2 -J-Xms2g -J-Xmx6g -J-XX:+UseG1GC
-          else
-            bash ./build-macos.sh
-          fi
-
+          bash ./build-macos.sh
 
       - name: Upload Build Artifact (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
