@@ -2,7 +2,6 @@
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
-# 配置变量
 $SERVER_VERSION = if ($env:SERVER_VERSION) { $env:SERVER_VERSION } else { "1.21.11" }
 
 $versionManifestJson = Invoke-RestMethod -Uri "https://piston-meta.mojang.com/mc/game/version_manifest.json"
@@ -42,29 +41,24 @@ if (-not $env:GRAALVM_HOME) {
 
 $NI_EXEC = Join-Path $env:GRAALVM_HOME "bin\native-image"
 
-# 创建 build 目录
 if (-not (Test-Path $BUILD_DIR)) {
     New-Item -ItemType Directory -Path $BUILD_DIR | Out-Null
 }
 Push-Location $BUILD_DIR
 
-# 下载 server.jar（如果不存在）
 if (-not (Test-Path $JAR_PATH)) {
     Write-Host "Downloading Minecraft's server.jar..."
     Invoke-WebRequest -Uri $SERVER_JAR_DL -OutFile $JAR_PATH
 }
 
 
-# 解压 META-INF 目录（如果不存在）
 if (-not (Test-Path $META_INF_PATH)) {
     Rename-Item -Path $JAR_PATH -NewName "server.zip" -Force
     Write-Host "Extracting resources from Minecraft's server.zip..."
     Expand-Archive -Path $ZIP_PATH -DestinationPath $BUILD_DIR -Force
-
-    # 解压完成后，将压缩包改回 jar 格式（便于后续可能的使用）
     Rename-Item -Path $ZIP_PATH -NewName "server.jar" -Force
 }
-# 检查并读取 classpath-joined 文件
+
 $classpathJoinedFile = Join-Path $META_INF_PATH "classpath-joined"
 if (-not (Test-Path $classpathJoinedFile)) {
     Write-Host "Unable to determine classpath. Exiting..."
@@ -72,7 +66,6 @@ if (-not (Test-Path $classpathJoinedFile)) {
 }
 $CLASSPATH_JOINED = (Get-Content $classpathJoinedFile -Raw).Trim()
 
-# 检查并读取 main-class 文件
 $mainClassFile = Join-Path $META_INF_PATH "main-class"
 if (-not (Test-Path $mainClassFile)) {
     Write-Host "Unable to determine main class. Exiting..."
@@ -82,7 +75,6 @@ $MAIN_CLASS = (Get-Content $mainClassFile -Raw).Trim()
 
 Push-Location $META_INF_PATH
 
-# 构建 native-image 参数数组（Windows 下使用分号分隔 classpath）
 $nativeImageArgs = @(
     "--no-fallback",
     "-H:ConfigurationFileDirectories=$AGENT_CONFIG_DIR",
@@ -101,17 +93,15 @@ $nativeImageArgs = @(
     "$MAIN_CLASS"
 )
 
-# 打印完整命令用于调试
 Write-Host "Executing command:"
 Write-Host "$NI_EXEC $($nativeImageArgs -join ' ')"
 
-# 直接调用 native-image 命令
 & $NI_EXEC @nativeImageArgs
 
 Move-Item -Path (Join-Path $META_INF_PATH "$BINARY_NAME.exe") -Destination (Join-Path $SCRIPT_DIR "$BINARY_NAME.exe") -Force
 
-Pop-Location  # 退出 META-INF
-Pop-Location  # 退出 BUILD_DIR
+Pop-Location
+Pop-Location
 
 Write-Host ""
 Write-Host "Done! The native Minecraft server is located at:"
