@@ -58,14 +58,22 @@ readonly MAIN_CLASS
 pushd "${META_INF_PATH}" > /dev/null
 echo "${NI_EXEC}" --no-fallback \
     -H:ConfigurationFileDirectories="${AGENT_CONFIG_DIR}" \
+    -H:IncludeResources="\\Qjoptsimple/HelpFormatterMessages.properties\\E" \
+    -H:IncludeResources="\\Qjoptsimple/ExceptionMessages.properties\\E" \
     -H:+AddAllCharsets \
     -H:+ReportExceptionStackTraces \
     --enable-url-protocols=https \
+    --add-modules=java.desktop \
     --initialize-at-run-time=io.netty \
+    --enable-monitoring=heapdump,jfr \
     --enable-native-access=ALL-UNNAMED \
+    -H:+SharedArenaSupport \
     --initialize-at-build-time=net.minecraft.util.profiling.jfr.event \
     --initialize-at-run-time=org.apache.logging.log4j \
     --initialize-at-run-time=joptsimple \
+    --initialize-at-run-time=java.awt \
+    --initialize-at-run-time=javax.swing \
+    --initialize-at-run-time=sun.awt \
     --initialize-at-run-time=org.apache.logging.log4j.core.util.DefaultShutdownCallbackRegistry \
     -H:Name="${BINARY_NAME}" \
     -cp "${CLASSPATH_JOINED//;/:}" \
@@ -73,14 +81,22 @@ echo "${NI_EXEC}" --no-fallback \
     "${MAIN_CLASS}"
 "${NI_EXEC}" --no-fallback \
     -H:ConfigurationFileDirectories="${AGENT_CONFIG_DIR}" \
+    -H:IncludeResources="\\Qjoptsimple/HelpFormatterMessages.properties\\E" \
+    -H:IncludeResources="\\Qjoptsimple/ExceptionMessages.properties\\E" \
     -H:+AddAllCharsets \
     -H:+ReportExceptionStackTraces \
     --enable-url-protocols=https \
+    --add-modules=java.desktop \
     --initialize-at-run-time=io.netty \
+    --enable-monitoring=heapdump,jfr \
     --enable-native-access=ALL-UNNAMED \
+    -H:+SharedArenaSupport \
     --initialize-at-build-time=net.minecraft.util.profiling.jfr.event \
     --initialize-at-run-time=org.apache.logging.log4j \
     --initialize-at-run-time=joptsimple \
+    --initialize-at-run-time=java.awt \
+    --initialize-at-run-time=javax.swing \
+    --initialize-at-run-time=sun.awt \
     --initialize-at-run-time=org.apache.logging.log4j.core.util.DefaultShutdownCallbackRegistry \
     -H:Name="${BINARY_NAME}" \
     -cp "${CLASSPATH_JOINED//;/:}" \
