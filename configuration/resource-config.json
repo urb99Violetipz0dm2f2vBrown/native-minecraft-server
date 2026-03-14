@@ -31,8 +31,6 @@
   }, {
     "pattern":"\\QMETA-INF/services/org.apache.logging.log4j.core.util.ContextDataProvider\\E"
   }, {
-    "pattern":"\\QMETA-INF/services/org.apache.logging.log4j.core.util.WatchEventService\\E"
-  }, {
     "pattern":"\\QMETA-INF/services/org.apache.logging.log4j.spi.Provider\\E"
   }, {
     "pattern":"\\QMETA-INF/services/org.apache.logging.log4j.util.PropertySource\\E"
@@ -48,6 +46,18 @@
     "pattern":"\\Qassets/minecraft/lang/en_us.json\\E"
   }, {
     "pattern":"\\Qcom/sun/jna/linux-x86-64/libjnidispatch.so\\E"
+  }, {
+    "pattern":"\\Qcom/sun/jna/linux-aarch64/libjnidispatch.so\\E"
+  }, {
+    "pattern":"\\Qcom/sun/jna/linux-arm64/libjnidispatch.so\\E"
+  }, {
+    "pattern":"\\Qcom/sun/jna/win32-x86-64/jnidispatch.dll\\E"
+  }, {
+    "pattern":"\\Qcom/sun/jna/darwin-x86-64/libjnidispatch.jnilib\\E"
+  }, {
+    "pattern":"\\Qcom/sun/jna/darwin-aarch64/libjnidispatch.jnilib\\E"
+  }, {
+    "pattern":"\\Qcom/sun/jna/*\\E"
   }, {
     "pattern":"\\Qdata/.mcassetsroot\\E"
   }, {
@@ -108,6 +118,10 @@
     "pattern":"\\Qoshi.architecture.properties\\E"
   }, {
     "pattern":"\\Qoshi.properties\\E"
+  }, {
+    "pattern":"\\Qpack.mcmeta\\E"
+  }, {
+    "pattern":"\\Qpack.png\\E"
   }, {
     "pattern":"\\Qversion.json\\E"
   }, {

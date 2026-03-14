@@ -59,29 +59,38 @@ jobs:
           "JAVA_HOME=$javaHome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           "GRAALVM_HOME=$javaHome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-      - name: Build and run native Minecraft server (Windows)
+      - name: Configure GraalVM environment on Non-Windows
+        if: ${{ matrix.os != 'windows-latest' }}
+        shell: bash
+        run: |
+          graalvm_dir="${{ steps.setup-graalvm.outputs.graalvm-directory }}"
+          if [[ -n "${graalvm_dir}" && -d "${graalvm_dir}" ]]; then
+            java_home="${graalvm_dir}"
+          elif [[ -n "${JAVA_HOME:-}" && -d "${JAVA_HOME}" ]]; then
+            java_home="${JAVA_HOME}"
+          else
+            echo "Unable to determine GraalVM/JAVA_HOME on non-Windows runner." >&2
+            exit 1
+          fi
+
+          {
+            echo "JAVA_HOME=${java_home}"
+            echo "GRAALVM_HOME=${java_home}"
+          } >> "${GITHUB_ENV}"
+
+      - name: Build native Minecraft server (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
         shell: pwsh
         run: |
           Write-Output "Building for OS=${env:TARGET_OS} and ARCH=${env:TARGET_ARCH}"
-          .\build.ps1
+          python build.py
 
-      - name: Build and run native Minecraft server (Linux)
-        if: ${{ startsWith(matrix.os, 'ubuntu-') }}
+      - name: Build native Minecraft server (Non-Windows)
+        if: ${{ matrix.os != 'windows-latest' }}
         shell: bash
         run: |
           echo "Building for OS=${TARGET_OS} and ARCH=${TARGET_ARCH}"
-          chmod 775 ./build.sh
-          bash ./build.sh
-
-
-      - name: Build and run native Minecraft server (macOS)
-        if: ${{ startsWith(matrix.os, 'macos-') }}
-        shell: bash
-        run: |
-          echo "Building for OS=${TARGET_OS} and ARCH=${TARGET_ARCH}"
-          chmod 775 ./build-macos.sh
-          bash ./build-macos.sh
+          python3 build.py
 
       - name: Upload Build Artifact (Windows)
         if: ${{ matrix.os == 'windows-latest' }}

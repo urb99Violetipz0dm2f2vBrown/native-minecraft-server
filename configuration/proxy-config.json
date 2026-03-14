@@ -4,5 +4,8 @@
   },
   {
     "interfaces":["oshi.jna.platform.linux.LinuxLibc"]
+  },
+  {
+    "interfaces":["com.sun.jna.platform.win32.Kernel32"]
   }
 ]

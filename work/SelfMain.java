@@ -1,0 +1,110 @@
+package work;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+/**
+ * Minimal entrypoint for native-image AOT compilation.
+ *
+ * Behavior:
+ * 1) Ensures eula.txt exists with "eula=true".
+ * 2) Delegates to the real Minecraft server main, passing through args.
+ *
+ * This is useful when you want a controlled entrypoint that always generates EULA.
+ */
+public final class SelfMain {
+    private SelfMain() {}
+
+    public static void main(String[] args) {
+        try {
+            // Match Minecraft server behavior: EULA is checked in current working directory.
+            // Avoid repeated disk writes: only create it if missing.
+            Path eula = Path.of("eula.txt");
+            if (!Files.exists(eula)) {
+                Files.writeString(eula, "eula=true\n", StandardCharsets.UTF_8);
+            }
+        } catch (IOException e) {
+            // Don't fail hard; still try to start the server. Print for debugging.
+            e.printStackTrace();
+        }
+
+        // Pre-bind 25565; if occupied, increment until a free port is found.
+        // Then pass --port <freePort> to the server.
+        int port = 25565;
+        while (true) {
+            try (ServerSocket ss = new ServerSocket()) {
+                ss.setReuseAddress(false);
+                ss.bind(new InetSocketAddress("0.0.0.0", port));
+                break;
+            } catch (IOException ignored) {
+                port++;
+                // Avoid infinite loop in pathological cases.
+                if (port > 65535) {
+                    throw new RuntimeException("No available port found in range 25565-65535");
+                }
+            }
+        }
+
+        // Delegate to the real server main.
+        // Force --nogui and inject --port while preserving user args.
+        String[] forwarded;
+        if (args == null || args.length == 0) {
+            forwarded = new String[] { "--nogui", "--port", String.valueOf(port) };
+        } else {
+            forwarded = new String[args.length + 3];
+            forwarded[0] = "--nogui";
+            forwarded[1] = "--port";
+            forwarded[2] = String.valueOf(port);
+            System.arraycopy(args, 0, forwarded, 3, args.length);
+        }
+
+        // Determine real server main class, in priority order:
+        // 1) env var MC_ENTRY_CLASS (written by build.py into build/env.{cmd,sh} for easy sourcing)
+        // 2) META-INF/main-class (build.py already includes it as a resource in native image config)
+        // 3) final fallback: net.minecraft.server.Main (vanilla)
+        String entryClass = System.getenv("MC_ENTRY_CLASS");
+        if (entryClass == null || entryClass.isBlank()) {
+            entryClass = readResourceOrFileMainClass();
+        }
+        if (entryClass == null || entryClass.isBlank()) {
+            entryClass = "net.minecraft.server.Main";
+        }
+
+        // Also expose the resolved entry to the process env for downstream code that reads it
+        // via System.getenv (can't mutate env reliably), so we set a system property too.
+        System.setProperty("MC_ENTRY_CLASS", entryClass);
+
+        try {
+            Class<?> mainClz = Class.forName(entryClass);
+            java.lang.reflect.Method m = mainClz.getMethod("main", String[].class);
+            m.invoke(null, (Object) forwarded);
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+    }
+
+    private static String readResourceOrFileMainClass() {
+        // Try classpath resource first (works inside native-image if included).
+        try (var is = SelfMain.class.getClassLoader().getResourceAsStream("META-INF/main-class")) {
+            if (is != null) {
+                return new String(is.readAllBytes(), StandardCharsets.UTF_8).trim();
+            }
+        } catch (Throwable ignored) {
+        }
+
+        // Fallback: if someone runs on JVM or keeps META-INF extracted on disk.
+        try {
+            Path p = Path.of("META-INF", "main-class");
+            if (Files.exists(p)) {
+                return Files.readString(p, StandardCharsets.UTF_8).trim();
+            }
+        } catch (Throwable ignored) {
+        }
+
+        return null;
+    }
+}
