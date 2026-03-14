@@ -11,6 +11,9 @@ on:
 
 jobs:
   build:
+    outputs:
+      server_version: ${{ steps.meta.outputs.server_version }}
+      release_tag: ${{ steps.meta.outputs.release_tag }}
     strategy:
       fail-fast: false
       matrix:
@@ -29,6 +32,7 @@ jobs:
     env:
       TARGET_OS: ${{ matrix.os }}
       TARGET_ARCH: ${{ matrix.arch }}
+      SERVER_VERSION: 1.21.11
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -42,6 +46,39 @@ jobs:
           java-version: '25'
           distribution: 'graalvm'
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve build metadata
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${GITHUB_REF_TYPE:-}" == "tag" && "${GITHUB_REF_NAME:-}" == v-* ]]; then
+            server_version="${GITHUB_REF_NAME#v-}"
+          else
+            server_version="${SERVER_VERSION}"
+          fi
+
+          base_tag="v-${server_version}"
+          release_tag="${base_tag}"
+
+          if [[ "${GITHUB_EVENT_NAME}" != "pull_request" ]]; then
+            if [[ ! ("${GITHUB_REF_TYPE:-}" == "tag" && "${GITHUB_REF_NAME:-}" == "${base_tag}") ]]; then
+              if git ls-remote --exit-code --tags origin "refs/tags/${base_tag}" >/dev/null 2>&1; then
+                release_tag="${base_tag}-$(date -u +%F)"
+              fi
+            fi
+          fi
+
+          {
+            echo "SERVER_VERSION=${server_version}"
+            echo "RELEASE_TAG=${release_tag}"
+          } >> "${GITHUB_ENV}"
+
+          {
+            echo "server_version=${server_version}"
+            echo "release_tag=${release_tag}"
+          } >> "${GITHUB_OUTPUT}"
 
       - name: Configure GraalVM environment on Windows
         if: ${{ matrix.os == 'windows-latest' }}
@@ -96,18 +133,18 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         uses: actions/upload-artifact@v4
         with:
-          name: "minecraft-server-${{ matrix.os }}-${{ matrix.arch }}"
+          name: "minecraft-server-${{ env.SERVER_VERSION }}-${{ matrix.os }}-${{ matrix.arch }}"
           path: ./native-minecraft-server.exe
 
       - name: Upload Build Artifact (Non-Windows)
         if: ${{ matrix.os != 'windows-latest' }}
         uses: actions/upload-artifact@v4
         with:
-          name: "minecraft-server-${{ matrix.os }}-${{ matrix.arch }}"
+          name: "minecraft-server-${{ env.SERVER_VERSION }}-${{ matrix.os }}-${{ matrix.arch }}"
           path: ./native-minecraft-server
 
   release:
-    if: ${{ always() }}
+    if: ${{ needs.build.result == 'success' && github.event_name != 'pull_request' }}
     needs: build
     runs-on: ubuntu-22.04
     steps:
@@ -124,16 +161,12 @@ jobs:
             fi
           done
 
-      - name: Set up date
-        id: date
-        run: echo "DATE=$(date +'%Y.%m.%d')" >> $GITHUB_ENV
-
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ env.DATE }}
-          name: Release v${{ env.DATE }}
+          tag_name: ${{ needs.build.outputs.release_tag }}
+          name: Release ${{ needs.build.outputs.release_tag }}
           draft: false
           prerelease: false
           files: ./*.zip

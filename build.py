@@ -41,7 +41,7 @@ CONFIG_DIR = SCRIPT_DIR / "configuration"
 BUILD_DIR = SCRIPT_DIR / "build"
 WORK_DIR = SCRIPT_DIR / "work"
 
-SERVER_VERSION = os.environ.get("SERVER_VERSION", "1.21.11")
+SERVER_VERSION = os.environ.get("SERVER_VERSION", "1.21.11").strip() or "1.21.11"
 BINARY_NAME = "native-minecraft-server"
 
 GRAALVM_HOME = os.environ.get("GRAALVM_HOME", "").strip()
@@ -316,6 +316,7 @@ def main(argv: list[str]) -> int:
         extra_args = argv[idx + 1 :]
         argv = argv[:idx]
 
+    print(f"[INFO] SERVER_VERSION={SERVER_VERSION}")
     ensure_build_artifacts()
 
     classpath_joined = read_text(META_INF_PATH / "classpath-joined")
