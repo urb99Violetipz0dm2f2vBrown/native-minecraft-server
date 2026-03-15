@@ -156,6 +156,13 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
+  "name":"com.sun.jna.platform.win32.WinDef$DWORDByReference",
+  "allDeclaredConstructors":true,
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"com.sun.jna.platform.win32.WinDef$WORD",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
@@ -181,6 +188,18 @@
 },
 {
   "name":"com.sun.jna.platform.win32.WinNT$OSVERSIONINFOEXW",
+  "allDeclaredConstructors":true,
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true
+},
+{
+  "name":"com.sun.jna.platform.win32.Psapi$PERFORMANCE_INFORMATION",
+  "allDeclaredConstructors":true,
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true
+},
+{
+  "name":"oshi.jna.Struct$CloseablePerformanceInformation",
   "allDeclaredConstructors":true,
   "allDeclaredFields":true,
   "allDeclaredMethods":true
