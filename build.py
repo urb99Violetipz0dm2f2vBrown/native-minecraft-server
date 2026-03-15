@@ -259,7 +259,6 @@ def build_native_image(classpath_joined: str, extra_args: list[str]) -> None:
         "-H:+ReportExceptionStackTraces",
         "--enable-url-protocols=https",
         "--initialize-at-run-time=io.netty",
-        "--enable-monitoring=heapdump,jfr",
         "--enable-native-access=ALL-UNNAMED",
         "-H:+SharedArenaSupport",
         "--initialize-at-build-time=net.minecraft.util.profiling.jfr.event",
@@ -270,7 +269,6 @@ def build_native_image(classpath_joined: str, extra_args: list[str]) -> None:
     if system_name == "linux":
         args.append("--gc=G1")
 
-    # macOS needs desktop modules/init for AWT/Swing in some cases (kept consistent with build-macos.sh)
     if system_name == "darwin":
         args += [
             "--add-modules=java.desktop",
